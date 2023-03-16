@@ -1,5 +1,7 @@
 package com.betting.javawalletsystem.model;
 
+import com.sun.istack.NotNull;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,13 +13,18 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private Instant transactionDt;
 
+    @NotNull
     private BigDecimal cashAmount;
 
+    @NotNull
     private BigDecimal cashBalanceAfter;
 
+    @NotNull
     private BigDecimal bonusAmount;
 
+    @NotNull
     private BigDecimal bonusBalanceAfter;
 }

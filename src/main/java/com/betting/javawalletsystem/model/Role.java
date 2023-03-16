@@ -6,29 +6,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Player {
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
     @Column(unique = true)
-    private String username;
+    private String name;
 
-    @NotNull
-    @OneToOne
-    private Wallet wallet;
+    @OneToMany(targetEntity = Player.class, mappedBy = "role", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Player> players;
 
-    @NotNull
-    private String password;
-
-    @NotNull
-    @ManyToOne
-    private Role role;
-
+    public boolean isAdmin(){
+        return name.toLowerCase().equals("admin");
+    }
 }

@@ -1,5 +1,6 @@
 package com.betting.javawalletsystem.model;
 
+import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,11 +17,14 @@ public class Bet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     private BigDecimal amount;
 
+    @NotNull
     @Enumerated(EnumType.ORDINAL)
     private BetStatus betStatus;
 
+    @NotNull
     @OneToOne
     private Player player;
 }
