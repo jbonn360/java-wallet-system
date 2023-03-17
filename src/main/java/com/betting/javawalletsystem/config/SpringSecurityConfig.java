@@ -13,8 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableWebSecurity
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     // todo: switch to non-deprecated class
-    private AuthenticationEntryPoint entryPoint;
-    private UserDetailsServiceImpl userDetailsService;
+    private final AuthenticationEntryPoint entryPoint;
+    private final UserDetailsServiceImpl userDetailsService;
 
     public SpringSecurityConfig(@Autowired AuthenticationEntryPoint entryPoint,
                                 @Autowired UserDetailsServiceImpl userDetailsService){
