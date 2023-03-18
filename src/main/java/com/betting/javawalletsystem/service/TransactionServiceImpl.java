@@ -1,5 +1,6 @@
 package com.betting.javawalletsystem.service;
 
+import com.betting.javawalletsystem.model.Player;
 import com.betting.javawalletsystem.model.Transaction;
 import com.betting.javawalletsystem.model.TransactionType;
 import com.betting.javawalletsystem.model.Wallet;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Optional;
 
 @Service
 public class TransactionServiceImpl implements TransactionService{
@@ -20,16 +22,23 @@ public class TransactionServiceImpl implements TransactionService{
 
 
     @Override
-    public Transaction saveTransaction(Wallet wallet, BigDecimal cashAmount, BigDecimal bonusAmount,
-                                       TransactionType transactionType) {
+    public Transaction saveTransaction(Player player, BigDecimal cashAmount, BigDecimal bonusAmount,
+                                       Long transactionId, TransactionType transactionType) {
         Transaction transaction = Transaction.builder()
+                .transactionId(transactionId)
                 .transactionDt(Instant.now())
-                .bonusBalanceAfter(wallet.getBonusBalance())
-                .cashBalanceAfter(wallet.getCashBalance())
+                .player(player)
+                .bonusBalanceAfter(player.getWallet().getBonusBalance())
+                .cashBalanceAfter(player.getWallet().getCashBalance())
                 .bonusAmount(bonusAmount) // todo: implement bonus balance feature
                 .cashAmount(cashAmount)
                 .type(transactionType).build();
 
         return transactionRepository.save(transaction);
+    }
+
+    @Override
+    public Optional<Transaction> getTransactionByTransactionId(Long transactionId) {
+        return transactionRepository.findByTransactionId(transactionId);
     }
 }

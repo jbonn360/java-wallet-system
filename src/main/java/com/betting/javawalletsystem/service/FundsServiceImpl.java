@@ -2,6 +2,7 @@ package com.betting.javawalletsystem.service;
 
 import com.betting.javawalletsystem.dto.DepositRequestDto;
 import com.betting.javawalletsystem.dto.DepositResponseDto;
+import com.betting.javawalletsystem.exception.TransactionExistsException;
 import com.betting.javawalletsystem.exception.UserNotFoundException;
 import com.betting.javawalletsystem.model.Player;
 import com.betting.javawalletsystem.model.Transaction;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 public class FundsServiceImpl implements FundsService{
@@ -36,12 +38,39 @@ public class FundsServiceImpl implements FundsService{
     @Transactional
     @Override
     public DepositResponseDto processDeposit(DepositRequestDto depositRequest) {
-        // todo: check that player id corresponds to the currently authenticated player
+        Optional<Transaction> transactionOpt = transactionService.getTransactionByTransactionId(
+                depositRequest.getTransactionId());
+
+        // if transactionOpt exists but amount or user is different
+        if(transactionOpt.isPresent()){
+            if(transactionOpt.get().getCashAmount().compareTo(depositRequest.getAmount()) != 0)
+                throw new TransactionExistsException(
+                        String.format("Transaction with id %d already exists but amount is different",
+                                depositRequest.getTransactionId()));
+            else if(transactionOpt.get().getPlayer().getId() != depositRequest.getPlayerId())
+                throw new TransactionExistsException(
+                        String.format("Transaction with id %d already exists but user is different",
+                                depositRequest.getTransactionId()));
+        }
+
+        final Transaction transaction = transactionOpt.orElseGet(() -> carryOutTransaction(depositRequest));
+
+        // return response dto representing the transactionOpt
+        DepositResponseDto depositResponse = DepositResponseDto.builder()
+                .transactionId(transaction.getTransactionId())
+                .playerId(transaction.getPlayer().getId())
+                .cashBalance(transaction.getCashBalanceAfter())
+                .bonusBalance(transaction.getBonusBalanceAfter()).build();
+
+        return depositResponse;
+    }
+
+    private Transaction carryOutTransaction(DepositRequestDto depositRequest){
         // get player from database
-        Player player = playerRepository.findById(depositRequest.playerId).orElseThrow(
+        Player player = playerRepository.findById(depositRequest.getPlayerId()).orElseThrow(
                 () -> new UserNotFoundException(String.format("User with id %d not found",
-                        depositRequest.playerId)
-        ));
+                        depositRequest.getPlayerId())
+                ));
 
         // add funds to player's wallet
         Wallet wallet = player.getWallet();
@@ -55,19 +84,14 @@ public class FundsServiceImpl implements FundsService{
             wallet.setBonusBalance(wallet.getBonusBalance().add(bonusAmount));
         }
 
+        // update wallet balance
         wallet = walletRepository.save(wallet);
+        player.setWallet(wallet);
 
         //create new transaction object in db
-        Transaction transaction = transactionService.saveTransaction(wallet, depositRequest.amount,
-                bonusAmount, TransactionType.DEPOSIT);
+        Transaction transaction = transactionService.saveTransaction(player, depositRequest.getAmount(),
+                bonusAmount, depositRequest.getTransactionId(), TransactionType.DEPOSIT);
 
-        // return response dto representing the transaction
-        DepositResponseDto depositResponse = DepositResponseDto.builder()
-                .transactionId(depositRequest.transactionId)
-                .playerId(depositRequest.playerId)
-                .cashBalance(transaction.getCashBalanceAfter())
-                .bonusBalance(transaction.getBonusBalanceAfter()).build();
-
-        return depositResponse;
+        return transaction;
     }
 }

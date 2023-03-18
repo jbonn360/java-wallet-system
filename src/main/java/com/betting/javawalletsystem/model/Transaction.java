@@ -21,6 +21,10 @@ public class Transaction {
     private Long id;
 
     @NotNull
+    @Column(unique = true)
+    private Long transactionId;
+
+    @NotNull
     private Instant transactionDt;
 
     @NotNull
@@ -38,4 +42,8 @@ public class Transaction {
     @NotNull
     @Enumerated(EnumType.ORDINAL)
     private TransactionType type;
+
+    @NotNull
+    @ManyToOne
+    private Player player;
 }

@@ -17,17 +17,17 @@ import java.math.BigDecimal;
 public class DepositResponseDto {
     @NotNull
     @Positive
-    public Long transactionId;
+    private Long transactionId;
 
     @NotNull
     @Positive
-    public Long playerId;
+    private Long playerId;
 
     @NotNull
     @Positive
-    public BigDecimal cashBalance;
+    private BigDecimal cashBalance;
 
     @NotNull
     @PositiveOrZero
-    public BigDecimal bonusBalance;
+    private BigDecimal bonusBalance;
 }

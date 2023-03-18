@@ -16,13 +16,13 @@ import java.math.BigDecimal;
 public class DepositRequestDto {
     @NotNull
     @Positive
-    public Long transactionId;
+    private Long transactionId;
 
     @NotNull
     @Positive
-    public Long playerId;
+    private Long playerId;
 
     @NotNull
     @Positive
-    public BigDecimal amount;
+    private BigDecimal amount;
 }

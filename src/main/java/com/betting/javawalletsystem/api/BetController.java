@@ -6,14 +6,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/api/v1/bet")
+@RequestMapping("/api/v1")
 public class BetController {
-    @PostMapping
+    @PostMapping("/bet")
     public ResponseEntity placeBet() {
         return null;
     }
 
-    @PostMapping("/win")
+    @PostMapping("/admin/bet/win")
     public ResponseEntity winBet() {
         return null;
     }

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/api/v1/transactions")
+@RequestMapping("/api/v1/admin/transactions")
 public class TransactionsController {
     @GetMapping
     public ResponseEntity listTransactions() {
