@@ -1,10 +1,11 @@
 package com.betting.javawalletsystem.service;
 
+import com.betting.javawalletsystem.dto.BetUpdateRequestDto;
 import com.betting.javawalletsystem.dto.TransactionRequestDto;
 import com.betting.javawalletsystem.dto.TransactionResponseDto;
 import com.betting.javawalletsystem.exception.InsufficientFundsException;
 import com.betting.javawalletsystem.exception.InvalidTransactionException;
-import com.betting.javawalletsystem.exception.PlayerNotFoundException;
+import com.betting.javawalletsystem.exception.ObjectNotFoundException;
 import com.betting.javawalletsystem.mappers.TransactionMapper;
 import com.betting.javawalletsystem.model.*;
 import com.betting.javawalletsystem.repository.BetRepository;
@@ -60,7 +61,7 @@ public class BetServiceImpl implements BetService{
     private Transaction placeBet(TransactionRequestDto betRequest) {
         // get player from database
         Player player = playerRepository.findById(betRequest.getPlayerId()).orElseThrow(
-                () -> new PlayerNotFoundException(String.format("User with id %d not found",
+                () -> new ObjectNotFoundException(String.format("User with id %d not found",
                         betRequest.getPlayerId())
                 ));
 
@@ -101,5 +102,94 @@ public class BetServiceImpl implements BetService{
                 bet.getBonusAmount(), betRequest.getTransactionId(), TransactionType.BET_PLACEMENT);
 
         return transaction;
+    }
+
+    @Transactional
+    @Override
+    public TransactionResponseDto updateBetStatus(BetUpdateRequestDto betUpdateRequest) {
+        // validate win amount
+        if(betUpdateRequest.getAmount().compareTo(BigDecimal.ZERO) < 0)
+            throw new InvalidTransactionException(
+                    String.format("Cannot set bet outcome amount to %d", betUpdateRequest.getAmount())
+            );
+
+        // deduce transaction type from amout won
+        final TransactionType transactionType = betUpdateRequest.getAmount().equals(BigDecimal.ZERO) ?
+                TransactionType.BET_LOSS : TransactionType.BET_WIN;
+
+        // check for prior transactions
+        Optional<Transaction> transactionOpt = transactionService.getAndCheckTransaction(
+                betUpdateRequest, transactionType);
+
+        final Transaction transaction = transactionOpt.orElseGet(() -> updateBet(betUpdateRequest, transactionType));
+
+        final TransactionResponseDto betPlacementResponse = transactionMapper
+                .transactionModelToTransactionResponseDto(transaction);
+
+        return betPlacementResponse;
+    }
+
+    private Transaction updateBet(BetUpdateRequestDto betUpdateRequest, TransactionType transactionType) {
+        //deduce bet status
+        final BetStatus betStatus = betUpdateRequest.getAmount().equals(BigDecimal.ZERO) ?
+                BetStatus.LOST : BetStatus.WON;
+
+        // update bet status
+        Bet bet = betRepository.findByTransactionId(betUpdateRequest.getBetTransactionId()).orElseThrow(
+                () -> new ObjectNotFoundException(String.format("Bet with transaction id %d was not found",
+                        betUpdateRequest.getBetTransactionId())
+                )
+        );
+
+        bet.setBetStatus(betStatus);
+        bet = betRepository.save(bet);
+
+        // reward player (if won)
+        // 1. get player from database
+        Player player = playerRepository.findById(betUpdateRequest.getPlayerId()).orElseThrow(
+                () -> new ObjectNotFoundException(String.format("User with id %d not found",
+                        betUpdateRequest.getPlayerId())
+                ));
+
+        BigDecimal startingCashBalance = player.getWallet().getCashBalance();
+        BigDecimal startingBonusBalance = player.getWallet().getBonusBalance();
+
+        // 2. get wallet and update balance if won
+        if(betStatus == BetStatus.WON)
+            player.setWallet(handleBetWin(player, bet, betUpdateRequest));
+
+        //create new transaction object in db
+        BigDecimal transactionCashAmount = player.getWallet().getCashBalance().subtract(startingCashBalance);
+        BigDecimal transactionBonusAmount = player.getWallet().getBonusBalance().subtract(startingBonusBalance);
+
+        Transaction transaction = transactionService.saveTransaction(player, transactionCashAmount,
+                transactionBonusAmount, betUpdateRequest.getTransactionId(), transactionType);
+
+        return transaction;
+    }
+
+    private Wallet handleBetWin(Player player, Bet bet, BetUpdateRequestDto betUpdateRequest){
+        Wallet wallet = player.getWallet();
+        if(bet.getCashAmount().equals(BigDecimal.ZERO)) // pure cash bet
+            wallet.setBonusBalance(wallet.getBonusBalance().add(betUpdateRequest.getAmount()));
+        else if (bet.getBonusAmount().equals(BigDecimal.ZERO)) // pure bonus bet
+            wallet.setCashBalance(wallet.getCashBalance().add(betUpdateRequest.getAmount()));
+        else{
+            // mixed cash / bonus bet win
+            final double cashFraction =
+                    bet.getCashAmount().doubleValue() / bet.getCombinedAmount().doubleValue();
+            final double bonusFraction =
+                    bet.getCashAmount().doubleValue() / bet.getCombinedAmount().doubleValue();
+
+            final  BigDecimal cashWon =
+                    betUpdateRequest.getAmount().multiply(BigDecimal.valueOf(cashFraction));
+            final BigDecimal bonusWon =
+                    betUpdateRequest.getAmount().multiply(BigDecimal.valueOf(bonusFraction));
+
+            wallet.setCashBalance(wallet.getCashBalance().add(cashWon));
+            wallet.setBonusBalance(wallet.getBonusBalance().add(bonusWon));
+        }
+
+        return walletRepository.save(wallet);
     }
 }

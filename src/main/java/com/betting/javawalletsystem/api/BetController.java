@@ -1,12 +1,11 @@
 package com.betting.javawalletsystem.api;
 
+import com.betting.javawalletsystem.dto.BetUpdateRequestDto;
 import com.betting.javawalletsystem.dto.TransactionRequestDto;
 import com.betting.javawalletsystem.dto.TransactionResponseDto;
 import com.betting.javawalletsystem.service.BetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,7 +27,7 @@ public class BetController {
     }
 
     @PostMapping("/admin/bet/win")
-    public ResponseEntity winBet() {
-        return null;
+    public TransactionResponseDto winBet(@Valid @RequestBody BetUpdateRequestDto winRequest) {
+        return betService.updateBetStatus(winRequest);
     }
 }

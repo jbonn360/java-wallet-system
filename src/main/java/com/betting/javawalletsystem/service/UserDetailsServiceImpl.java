@@ -1,6 +1,6 @@
 package com.betting.javawalletsystem.service;
 
-import com.betting.javawalletsystem.exception.PlayerNotFoundException;
+import com.betting.javawalletsystem.exception.ObjectNotFoundException;
 import com.betting.javawalletsystem.model.Player;
 import com.betting.javawalletsystem.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Player player = playerRepository.findByUsername(username).orElseThrow(
-                () -> new PlayerNotFoundException(String.format("User with username %s was not found", username))
+                () -> new ObjectNotFoundException(String.format("User with username %s was not found", username))
         );
 
         return new User(player.getUsername(), player.getPassword(), getGrantedAuthority(player));

@@ -32,8 +32,8 @@ public class MvcExceptionHandler {
         return new ResponseEntity(error, httpHeaders, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(PlayerNotFoundException.class)
-    public ResponseEntity<ErrorDto> userNotFoundExceptionHandler(PlayerNotFoundException ex) {
+    @ExceptionHandler(ObjectNotFoundException.class)
+    public ResponseEntity<ErrorDto> objectNotFoundExceptionHandler(ObjectNotFoundException ex) {
         final ErrorDto error = new ErrorDto(ex.getMessage());
 
         return new ResponseEntity(error, httpHeaders, HttpStatus.NOT_FOUND);

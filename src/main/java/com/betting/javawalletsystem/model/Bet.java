@@ -36,4 +36,8 @@ public class Bet {
     @NotNull
     @OneToOne
     private Player player;
+
+    public BigDecimal getCombinedAmount(){
+        return cashAmount.add(bonusAmount);
+    }
 }

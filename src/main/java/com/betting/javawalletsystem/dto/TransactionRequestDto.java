@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
 @Data
@@ -23,6 +24,6 @@ public class TransactionRequestDto {
     private Long playerId;
 
     @NotNull
-    @Positive
+    @PositiveOrZero
     private BigDecimal amount;
 }
