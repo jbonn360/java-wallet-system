@@ -69,7 +69,7 @@ public class BetServiceImpl implements BetService{
 
         // check that player affords bet
         if(wallet.getCombinedBalance().compareTo(betRequest.getAmount()) < 0)
-            throw new InsufficientFundsException("Player does not have enough funds");
+            throw new InsufficientFundsException("Player does not have enough funds to place bet");
 
         BigDecimal startingCashBalance = wallet.getCashBalance();
         BigDecimal startingBonusBalance = wallet.getBonusBalance();

@@ -2,6 +2,7 @@ package com.betting.javawalletsystem.service;
 
 import com.betting.javawalletsystem.dto.TransactionRequestDto;
 import com.betting.javawalletsystem.dto.TransactionResponseDto;
+import com.betting.javawalletsystem.exception.InsufficientFundsException;
 import com.betting.javawalletsystem.exception.InvalidTransactionException;
 import com.betting.javawalletsystem.exception.ObjectNotFoundException;
 import com.betting.javawalletsystem.mappers.TransactionMapper;
@@ -50,7 +51,7 @@ public class FundsServiceImpl implements FundsService{
         Optional<Transaction> transactionOpt = transactionService.getAndCheckTransaction(
                 depositRequest, TransactionType.DEPOSIT);
 
-        final Transaction transaction = transactionOpt.orElseGet(() -> carryOutTransaction(depositRequest));
+        final Transaction transaction = transactionOpt.orElseGet(() -> createDepositTransaction(depositRequest));
 
         final TransactionResponseDto depositResponse = transactionMapper
                 .transactionModelToTransactionResponseDto(transaction);
@@ -58,7 +59,7 @@ public class FundsServiceImpl implements FundsService{
         return depositResponse;
     }
 
-    private Transaction carryOutTransaction(TransactionRequestDto depositRequest){
+    private Transaction createDepositTransaction(TransactionRequestDto depositRequest){
         // get player from database
         Player player = playerRepository.findById(depositRequest.getPlayerId()).orElseThrow(
                 () -> new ObjectNotFoundException(String.format("User with id %d not found",
@@ -84,6 +85,51 @@ public class FundsServiceImpl implements FundsService{
         //create new transaction object in db
         Transaction transaction = transactionService.saveTransaction(player, depositRequest.getAmount(),
                 bonusAmount, depositRequest.getTransactionId(), TransactionType.DEPOSIT);
+
+        return transaction;
+    }
+
+    @Transactional
+    @Override
+    public TransactionResponseDto processWithdrawal(TransactionRequestDto withdrawalRequest) {
+        if(withdrawalRequest.getAmount().compareTo(BigDecimal.ZERO) <= 0)
+            throw new InvalidTransactionException(
+                    String.format("Cannot process withdrawal with amount %d", withdrawalRequest.getAmount())
+            );
+
+        Optional<Transaction> transactionOpt = transactionService.getAndCheckTransaction(
+                withdrawalRequest, TransactionType.WITHDRAWAL);
+
+        final Transaction transaction = transactionOpt.orElseGet(
+                () -> createWithdrawalTransaction(withdrawalRequest));
+
+        final TransactionResponseDto depositResponse = transactionMapper
+                .transactionModelToTransactionResponseDto(transaction);
+
+        return depositResponse;
+    }
+
+    private Transaction createWithdrawalTransaction(TransactionRequestDto withdrawalRequest) {
+        // get player from database
+        Player player = playerRepository.findById(withdrawalRequest.getPlayerId()).orElseThrow(
+                () -> new ObjectNotFoundException(String.format("User with id %d not found",
+                        withdrawalRequest.getPlayerId())
+                ));
+
+        if(player.getWallet().getCashBalance().compareTo(withdrawalRequest.getAmount()) < 0)
+            throw new InsufficientFundsException("player does not have enough funds to perform withdrawal");
+
+        // remove funds from player's wallet
+        Wallet wallet = player.getWallet();
+        wallet.setCashBalance(wallet.getCashBalance().subtract(withdrawalRequest.getAmount()));
+
+        // update wallet balance
+        wallet = walletRepository.save(wallet);
+        player.setWallet(wallet);
+
+        //create new transaction object in db
+        Transaction transaction = transactionService.saveTransaction(player, withdrawalRequest.getAmount(),
+                BigDecimal.ZERO, withdrawalRequest.getTransactionId(), TransactionType.WITHDRAWAL);
 
         return transaction;
     }
