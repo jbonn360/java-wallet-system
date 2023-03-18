@@ -39,22 +39,13 @@ public class SecurityConfig /*extends WebSecurityConfigurerAdapter*/ {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
+        http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.DELETE)
-                .hasRole("ADMIN")
-                .antMatchers("**/admin/**")
-                .hasAnyRole("ADMIN")
-                //.antMatchers("/user/**")
-                //.hasAnyRole("USER", "ADMIN")
-                .anyRequest()
-                .authenticated()
-                .and()
-                .httpBasic()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .antMatchers(HttpMethod.DELETE).hasRole("ADMIN")
+                .antMatchers("/**/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+                .and().httpBasic()
+                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         return http.build();
     }

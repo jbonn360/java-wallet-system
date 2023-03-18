@@ -1,27 +1,21 @@
-package com.betting.javawalletsystem.model;
+package com.betting.javawalletsystem.dto;
 
+import com.betting.javawalletsystem.model.TransactionType;
+import com.sun.istack.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-@Entity
-public class Transaction {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+@Data
+public class TransactionDto {
     @NotNull
-    @Column(unique = true)
     private Long transactionId;
 
     @NotNull
@@ -40,10 +34,8 @@ public class Transaction {
     private BigDecimal bonusBalanceAfter;
 
     @NotNull
-    @Enumerated(EnumType.ORDINAL)
     private TransactionType type;
 
     @NotNull
-    @ManyToOne
-    private Player player;
+    private String player;
 }

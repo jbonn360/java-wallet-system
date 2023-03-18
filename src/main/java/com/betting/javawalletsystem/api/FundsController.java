@@ -1,19 +1,18 @@
 package com.betting.javawalletsystem.api;
 
 import com.betting.javawalletsystem.dto.DepositRequestDto;
+import com.betting.javawalletsystem.dto.DepositResponseDto;
 import com.betting.javawalletsystem.service.AuthorisationServiceImpl;
 import com.betting.javawalletsystem.service.FundsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
-@Controller
+@RestController
 @RequestMapping("/api/v1")
 public class FundsController {
     private final FundsService fundsService;
@@ -26,15 +25,20 @@ public class FundsController {
         this.authorisationService = authorisationService;
     }
 
-    @PostMapping("/deposit")
-    public ResponseEntity depositFunds(@Valid @RequestBody DepositRequestDto deposit) {
+    @PostMapping(value = "/deposit", consumes = "application/json", produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public DepositResponseDto depositFunds(@Valid @RequestBody DepositRequestDto deposit) {
         authorisationService.ensurePlayerAuthorised(deposit.getPlayerId());
 
-        return new ResponseEntity(fundsService.processDeposit(deposit), HttpStatus.CREATED);
+        DepositResponseDto response = fundsService.processDeposit(deposit);
+
+        return response;
     }
 
-    @PostMapping("/withdraw")
+    @PostMapping(value ="/withdraw", consumes = "application/json", produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity withdrawFunds() {
+
         return null;
     }
 }

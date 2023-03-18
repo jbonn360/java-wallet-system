@@ -31,7 +31,7 @@ public class MvcExceptionHandler {
     public ResponseEntity<ErrorDto> unauthorisedExceptionHandler(UnauthorisedException ex) {
         final ErrorDto error = new ErrorDto(ex.getMessage());
 
-        return new ResponseEntity(error, httpHeaders, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity(error, httpHeaders, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
