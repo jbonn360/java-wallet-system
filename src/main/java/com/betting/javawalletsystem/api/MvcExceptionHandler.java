@@ -3,7 +3,7 @@ package com.betting.javawalletsystem.api;
 import com.betting.javawalletsystem.dto.ErrorDto;
 import com.betting.javawalletsystem.exception.TransactionExistsException;
 import com.betting.javawalletsystem.exception.UnauthorisedException;
-import com.betting.javawalletsystem.exception.UserNotFoundException;
+import com.betting.javawalletsystem.exception.PlayerNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,8 +34,8 @@ public class MvcExceptionHandler {
         return new ResponseEntity(error, httpHeaders, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorDto> userNotFoundExceptionHandler(UserNotFoundException ex) {
+    @ExceptionHandler(PlayerNotFoundException.class)
+    public ResponseEntity<ErrorDto> userNotFoundExceptionHandler(PlayerNotFoundException ex) {
         final ErrorDto error = new ErrorDto(ex.getMessage());
 
         return new ResponseEntity(error, httpHeaders, HttpStatus.NOT_FOUND);

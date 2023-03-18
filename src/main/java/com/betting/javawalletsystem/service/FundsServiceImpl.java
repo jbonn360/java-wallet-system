@@ -3,7 +3,7 @@ package com.betting.javawalletsystem.service;
 import com.betting.javawalletsystem.dto.DepositRequestDto;
 import com.betting.javawalletsystem.dto.DepositResponseDto;
 import com.betting.javawalletsystem.exception.TransactionExistsException;
-import com.betting.javawalletsystem.exception.UserNotFoundException;
+import com.betting.javawalletsystem.exception.PlayerNotFoundException;
 import com.betting.javawalletsystem.model.Player;
 import com.betting.javawalletsystem.model.Transaction;
 import com.betting.javawalletsystem.model.TransactionType;
@@ -68,7 +68,7 @@ public class FundsServiceImpl implements FundsService{
     private Transaction carryOutTransaction(DepositRequestDto depositRequest){
         // get player from database
         Player player = playerRepository.findById(depositRequest.getPlayerId()).orElseThrow(
-                () -> new UserNotFoundException(String.format("User with id %d not found",
+                () -> new PlayerNotFoundException(String.format("User with id %d not found",
                         depositRequest.getPlayerId())
                 ));
 
