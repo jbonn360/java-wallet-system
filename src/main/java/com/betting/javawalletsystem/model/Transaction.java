@@ -46,4 +46,8 @@ public class Transaction {
     @NotNull
     @ManyToOne
     private Player player;
+
+    public BigDecimal getCombinedAmount() {
+        return cashAmount.add(bonusAmount);
+    }
 }

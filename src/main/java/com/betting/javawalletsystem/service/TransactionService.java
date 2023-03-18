@@ -1,6 +1,7 @@
 package com.betting.javawalletsystem.service;
 
 import com.betting.javawalletsystem.dto.TransactionListDto;
+import com.betting.javawalletsystem.dto.TransactionRequestDto;
 import com.betting.javawalletsystem.model.Player;
 import com.betting.javawalletsystem.model.Transaction;
 import com.betting.javawalletsystem.model.TransactionType;
@@ -13,7 +14,8 @@ public interface TransactionService {
     Transaction saveTransaction(Player player, BigDecimal cashAmount, BigDecimal bonusAmount,
                                 Long transactionId, TransactionType transactionType);
 
-    Optional<Transaction> getTransactionByTransactionId(Long transactionId);
-
     TransactionListDto getAllTransactions(int limit, int offset);
+
+    Optional<Transaction> getAndCheckTransaction(TransactionRequestDto transactionRequest,
+                                                 TransactionType transactionType);
 }

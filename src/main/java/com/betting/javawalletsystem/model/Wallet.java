@@ -28,4 +28,8 @@ public class Wallet {
     @PositiveOrZero
     @NotNull
     private BigDecimal bonusBalance;
+
+    public BigDecimal getCombinedBalance(){
+        return cashBalance.add(bonusBalance);
+    }
 }

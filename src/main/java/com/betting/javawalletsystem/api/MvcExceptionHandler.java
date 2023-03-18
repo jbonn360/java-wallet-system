@@ -1,9 +1,7 @@
 package com.betting.javawalletsystem.api;
 
 import com.betting.javawalletsystem.dto.ErrorDto;
-import com.betting.javawalletsystem.exception.TransactionExistsException;
-import com.betting.javawalletsystem.exception.UnauthorisedException;
-import com.betting.javawalletsystem.exception.PlayerNotFoundException;
+import com.betting.javawalletsystem.exception.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,5 +37,19 @@ public class MvcExceptionHandler {
         final ErrorDto error = new ErrorDto(ex.getMessage());
 
         return new ResponseEntity(error, httpHeaders, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<ErrorDto> insufficientFundsExceptionHandler(InsufficientFundsException ex) {
+        final ErrorDto error = new ErrorDto(ex.getMessage());
+
+        return new ResponseEntity(error, httpHeaders, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidTransactionException.class)
+    public ResponseEntity<ErrorDto> invalidTransactionExceptionHandler(InvalidTransactionException ex) {
+        final ErrorDto error = new ErrorDto(ex.getMessage());
+
+        return new ResponseEntity(error, httpHeaders, HttpStatus.BAD_REQUEST);
     }
 }

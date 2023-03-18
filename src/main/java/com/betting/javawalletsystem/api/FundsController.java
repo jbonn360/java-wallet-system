@@ -1,13 +1,12 @@
 package com.betting.javawalletsystem.api;
 
-import com.betting.javawalletsystem.dto.DepositRequestDto;
-import com.betting.javawalletsystem.dto.DepositResponseDto;
+import com.betting.javawalletsystem.dto.TransactionRequestDto;
+import com.betting.javawalletsystem.dto.TransactionResponseDto;
 import com.betting.javawalletsystem.service.AuthorisationServiceImpl;
 import com.betting.javawalletsystem.service.FundsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -27,10 +26,10 @@ public class FundsController {
 
     @PostMapping(value = "/deposit", consumes = "application/json", produces = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public DepositResponseDto depositFunds(@Valid @RequestBody DepositRequestDto deposit) {
+    public TransactionResponseDto depositFunds(@Valid @RequestBody TransactionRequestDto deposit) {
         authorisationService.ensurePlayerAuthorised(deposit.getPlayerId());
 
-        DepositResponseDto response = fundsService.processDeposit(deposit);
+        TransactionResponseDto response = fundsService.processDeposit(deposit);
 
         return response;
     }

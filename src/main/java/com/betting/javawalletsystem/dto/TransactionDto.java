@@ -37,5 +37,8 @@ public class TransactionDto {
     private TransactionType type;
 
     @NotNull
+    private Long playerId;
+
+    @NotNull
     private String player;
 }

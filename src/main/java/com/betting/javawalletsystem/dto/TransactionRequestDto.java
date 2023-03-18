@@ -7,14 +7,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Positive;
-import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DepositResponseDto {
+public class TransactionRequestDto {
     @NotNull
     @Positive
     private Long transactionId;
@@ -25,9 +24,5 @@ public class DepositResponseDto {
 
     @NotNull
     @Positive
-    private BigDecimal cashBalance;
-
-    @NotNull
-    @PositiveOrZero
-    private BigDecimal bonusBalance;
+    private BigDecimal amount;
 }
