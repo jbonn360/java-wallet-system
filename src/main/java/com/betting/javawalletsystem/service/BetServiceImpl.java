@@ -184,10 +184,13 @@ public class BetServiceImpl implements BetService{
             final double bonusFraction =
                     bet.getBonusAmount().doubleValue() / bet.getCombinedAmount().doubleValue();
 
-            final  BigDecimal cashWon =
+            BigDecimal cashWon =
                     betUpdateRequest.getAmount().multiply(BigDecimal.valueOf(cashFraction));
-            final BigDecimal bonusWon =
+            cashWon = cashWon.setScale(2, BigDecimal.ROUND_HALF_EVEN); // rounding
+
+            BigDecimal bonusWon =
                     betUpdateRequest.getAmount().multiply(BigDecimal.valueOf(bonusFraction));
+            bonusWon = bonusWon.setScale(2, BigDecimal.ROUND_HALF_EVEN); // rounding
 
             wallet.setCashBalance(wallet.getCashBalance().add(cashWon));
             wallet.setBonusBalance(wallet.getBonusBalance().add(bonusWon));
