@@ -40,7 +40,7 @@ public class TransactionServiceImpl implements TransactionService{
                 .player(player)
                 .bonusBalanceAfter(player.getWallet().getBonusBalance())
                 .cashBalanceAfter(player.getWallet().getCashBalance())
-                .bonusAmount(bonusAmount) // todo: implement bonus balance feature
+                .bonusAmount(bonusAmount)
                 .cashAmount(cashAmount)
                 .type(transactionType).build();
 
