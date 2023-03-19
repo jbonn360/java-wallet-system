@@ -63,10 +63,21 @@ public class TransactionServiceImpl implements TransactionService{
                 throw new TransactionExistsException(
                         String.format("Transaction with id %d already exists but transaction type is different",
                                 transactionRequest.getTransactionId()));
-            else if(transactionOpt.get().getCombinedAmount().compareTo(transactionRequest.getAmount()) != 0)
-                throw new TransactionExistsException(
-                        String.format("Transaction with id %d already exists but amount is different",
-                                transactionRequest.getTransactionId()));
+            else{
+                if(transactionType == TransactionType.BET_PLACEMENT ||  transactionType == TransactionType.BET_WIN ||
+                        transactionType == TransactionType.BET_LOSS)
+                {
+                    if(transactionOpt.get().getCombinedAmount().compareTo(transactionRequest.getAmount()) != 0)
+                        throw new TransactionExistsException(
+                                String.format("Transaction with id %d already exists but amount is different",
+                                        transactionRequest.getTransactionId()));
+                } else{
+                    if(transactionOpt.get().getCashAmount().compareTo(transactionRequest.getAmount()) != 0)
+                        throw new TransactionExistsException(
+                                String.format("Transaction with id %d already exists but amount is different",
+                                        transactionRequest.getTransactionId()));
+                }
+            }
         }
 
         return transactionOpt;

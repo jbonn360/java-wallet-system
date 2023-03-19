@@ -43,7 +43,7 @@ public class BetServiceImpl implements BetService{
     public TransactionResponseDto processBet(TransactionRequestDto betRequest) {
         if(betRequest.getAmount().compareTo(BigDecimal.ZERO) <= 0)
             throw new InvalidTransactionException(
-                    String.format("Cannot place bet with amount %d", betRequest.getAmount())
+                    String.format("Cannot place bet with amount %s", betRequest.getAmount())
             );
 
         Optional<Transaction> transactionOpt = transactionService.getAndCheckTransaction(
@@ -110,10 +110,10 @@ public class BetServiceImpl implements BetService{
         // validate win amount
         if(betUpdateRequest.getAmount().compareTo(BigDecimal.ZERO) < 0)
             throw new InvalidTransactionException(
-                    String.format("Cannot set bet outcome amount to %d", betUpdateRequest.getAmount())
+                    String.format("Cannot set bet outcome amount to %s", betUpdateRequest.getAmount())
             );
 
-        // deduce transaction type from amout won
+        // deduce transaction type from amount won
         final TransactionType transactionType = betUpdateRequest.getAmount().equals(BigDecimal.ZERO) ?
                 TransactionType.BET_LOSS : TransactionType.BET_WIN;
 
@@ -140,6 +140,9 @@ public class BetServiceImpl implements BetService{
                         betUpdateRequest.getBetTransactionId())
                 )
         );
+
+        if(bet.getBetStatus() != BetStatus.PLACED)
+            throw new InvalidTransactionException("Cannot update a bet that has already been won/lost");
 
         bet.setBetStatus(betStatus);
         bet = betRepository.save(bet);
@@ -170,16 +173,16 @@ public class BetServiceImpl implements BetService{
 
     private Wallet handleBetWin(Player player, Bet bet, BetUpdateRequestDto betUpdateRequest){
         Wallet wallet = player.getWallet();
-        if(bet.getCashAmount().equals(BigDecimal.ZERO)) // pure cash bet
+        if(bet.getCashAmount().compareTo(BigDecimal.ZERO) == 0) // pure bonus bet
             wallet.setBonusBalance(wallet.getBonusBalance().add(betUpdateRequest.getAmount()));
-        else if (bet.getBonusAmount().equals(BigDecimal.ZERO)) // pure bonus bet
+        else if (bet.getBonusAmount().compareTo(BigDecimal.ZERO) == 0) // pure cash bet
             wallet.setCashBalance(wallet.getCashBalance().add(betUpdateRequest.getAmount()));
         else{
             // mixed cash / bonus bet win
             final double cashFraction =
                     bet.getCashAmount().doubleValue() / bet.getCombinedAmount().doubleValue();
             final double bonusFraction =
-                    bet.getCashAmount().doubleValue() / bet.getCombinedAmount().doubleValue();
+                    bet.getBonusAmount().doubleValue() / bet.getCombinedAmount().doubleValue();
 
             final  BigDecimal cashWon =
                     betUpdateRequest.getAmount().multiply(BigDecimal.valueOf(cashFraction));
